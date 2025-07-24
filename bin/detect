@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+# This buildpack always passes detection since it's for debugging purposes
+# It doesn't require any specific files to be present
+
+echo "Environment Debug Buildpack"
+echo "0.0.1"
+
+exit 0

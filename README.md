@@ -1,68 +1,72 @@
-# Inline Buildpack Example
-
-This example demonstrates how to use an inline buildpack to debug environment variables and inspect the `$CNB_PLATFORM_DIR/env/` directory during the build process.
-
-## Repro
-
-Run without env vars:
+## Clear-env buildpack behavior
 
 ```
-$ pack build inline-bp-test --clear-cache --path .
-```
-
-Run with env vars:
-
-```
-$ pack build inline-bp-test --clear-cache --path . --env HELLO=world
-```
-
-## Demo
-
-```
-$ pack --version
-0.38.2+git-f1c347c.build-6533
-$ pack build inline-bp-test --clear-cache --path . --env HELLO=world
-=== Current Environment Variables ===
-CNB_BP_PLAN_PATH=/tmp/me_env-debug-866359196/me_env-debug/plan.toml
-CNB_BUILDPACK_DIR=/cnb/buildpacks/me_env-debug/0.0.0
-CNB_LAYERS_DIR=/layers/me_env-debug
-CNB_PLATFORM_DIR=/platform
-CNB_STACK_ID=heroku-24
-CNB_TARGET_ARCH=arm64
-CNB_TARGET_DISTRO_NAME=ubuntu
-CNB_TARGET_DISTRO_VERSION=24.04
-CNB_TARGET_OS=linux
-HELLO=world
-HOME=/home/heroku
-HOSTNAME=65bd3b5d7e2b
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-PWD=/workspace
-
+$ echo "clear-env = true" >> buildpack.toml
+$ pack build inline-bp-test --clear-cache --path . --buildpack . --env HELLO=world | grep HELLO -A5 -B5
+[builder]
 === CNB_PLATFORM_DIR/env/ Contents ===
-Directory exists: /platform/env
-total 12
-drwxr-xr-x 1 root root 4096 Jul 24 20:55 .
-drwxr-xr-x 1 root root 4096 Jul 24 20:55 ..
--rw-r--r-- 1 root root    5 Jan  1  1980 HELLO
-
-=== Contents of each file in CNB_PLATFORM_DIR/env/ ===
---- File: HELLO ---
-world
+[builder] Directory exists: /platform/env
+[builder] total 12
+[builder] drwxr-xr-x 1 root root 4096 Jul 24 21:22 .
+[builder] drwxr-xr-x 1 root root 4096 Jul 24 21:22 ..
+[builder] -rw-r--r-- 1 root root    5 Jan  1  1980 HELLO
+[builder]
+[builder] === Contents of each file in CNB_PLATFORM_DIR/env/ ===
+[builder] --- File: HELLO ---
+[builder] world
+[builder] === Environment Debug Buildpack Completed ===
+===> EXPORTING
+[exporter] Reusing layer 'buildpacksio/lifecycle:launch.sbom'
+[exporter] Reused 1/1 app layer(s)
 ```
 
-## What the Inline Buildpack Does
+```
+$ echo "clear-env = true" >> buildpack.toml
+$ pack build inline-bp-test --clear-cache --path . --buildpack . --env HELLO=world | grep HELLO -A5 -B5
+[builder]
+[builder] === CNB_PLATFORM_DIR/env/ Contents ===
+[builder] Directory exists: /platform/env
+[builder] total 12
+[builder] drwxr-xr-x 1 root root 4096 Jul 24 21:22 .
+[builder] drwxr-xr-x 1 root root 4096 Jul 24 21:22 ..
+[builder] -rw-r--r-- 1 root root    5 Jan  1  1980 HELLO
+[builder]
+[builder] === Contents of each file in CNB_PLATFORM_DIR/env/ ===
+[builder] --- File: HELLO ---
+[builder] world
+[builder] === Environment Debug Buildpack Completed ===
+===> EXPORTING
+[exporter] Reusing layer 'buildpacksio/lifecycle:launch.sbom'
+[exporter] Reused 1/1 app layer(s)
+```
 
-The inline buildpack defined in `project.toml` will:
-
-1. **Echo all current environment variables** - Shows all environment variables available during the build process, sorted alphabetically
-2. **List contents of `$CNB_PLATFORM_DIR/env/`** - Shows the directory structure and contents of any files in the platform environment directory
-3. **Display file contents** - If any files exist in the platform env directory, it will show their contents
-
-## Files
-
-- `project.toml` - Contains the inline buildpack definition
-
-## References
-
-- [Inline Buildpack Documentation](https://buildpacks.io/docs/for-app-developers/how-to/build-inputs/use-inline-buildpacks/)
-- [Cloud Native Buildpacks](https://buildpacks.io/)
+```
+$ echo "clear-env = false" >> buildpack.toml
+$ pack build inline-bp-test --clear-cache --path ./test-app --buildpack . --env HELLO=world | grep HELLO -A5 -B5
+[builder] CNB_STACK_ID=heroku-24
+[builder] CNB_TARGET_ARCH=arm64
+[builder] CNB_TARGET_DISTRO_NAME=ubuntu
+[builder] CNB_TARGET_DISTRO_VERSION=24.04
+[builder] CNB_TARGET_OS=linux
+[builder] HELLO=world
+[builder] HOME=/home/heroku
+[builder] HOSTNAME=c7e391ce428a
+[builder] PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+[builder] PWD=/workspace
+[builder] SHLVL=1
+--
+[builder] === CNB_PLATFORM_DIR/env/ Contents ===
+[builder] Directory exists: /platform/env
+[builder] total 12
+[builder] drwxr-xr-x 1 root root 4096 Jul 24 21:22 .
+[builder] drwxr-xr-x 1 root root 4096 Jul 24 21:22 ..
+[builder] -rw-r--r-- 1 root root    5 Jan  1  1980 HELLO
+[builder]
+[builder] === Contents of each file in CNB_PLATFORM_DIR/env/ ===
+[builder] --- File: HELLO ---
+[builder] world
+[builder] === Environment Debug Buildpack Completed ===
+===> EXPORTING
+[exporter] Reusing layer 'buildpacksio/lifecycle:launch.sbom'
+[exporter] Reused 1/1 app layer(s)
+```

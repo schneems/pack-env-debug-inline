@@ -1,0 +1,7 @@
+api = "0.10"
+
+[buildpack]
+id = "me/env-debug"
+version = "0.0.1"
+name = "Environment Debug Buildpack"
+description = "A buildpack that echoes environment variables and inspects CNB_PLATFORM_DIR/env/ contents for debugging purposes"

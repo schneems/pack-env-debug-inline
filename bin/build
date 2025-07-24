@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -e
+
+# Get the buildpack layers directory from the first argument
+layers_dir="$1"
+
+echo "=== Environment Debug Buildpack Starting ==="
+
+echo "=== Current Environment Variables ==="
+env | sort
+
+echo ""
+echo "=== CNB_PLATFORM_DIR/env/ Contents ==="
+if [ -d "$CNB_PLATFORM_DIR/env" ]; then
+    echo "Directory exists: $CNB_PLATFORM_DIR/env"
+    ls -la "$CNB_PLATFORM_DIR/env/"
+
+    echo ""
+    echo "=== Contents of each file in CNB_PLATFORM_DIR/env/ ==="
+    for file in "$CNB_PLATFORM_DIR/env"/*; do
+        if [ -f "$file" ]; then
+            echo "--- File: $(basename "$file") ---"
+            cat "$file"
+            echo ""
+        fi
+    done
+else
+    echo "Directory does not exist: $CNB_PLATFORM_DIR/env"
+fi
+
+echo "=== Environment Debug Buildpack Completed ==="
