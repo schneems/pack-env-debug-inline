@@ -1,0 +1,36 @@
+[_]
+schema-version = "0.2"
+id = "io.buildpacks.my-app"
+
+[[io.buildpacks.group]]
+id = "me/env-debug"
+
+[io.buildpacks.group.script]
+api = "0.10"
+inline = """
+set -e
+
+echo "=== Current Environment Variables ==="
+env | sort
+
+echo ""
+echo "=== CNB_PLATFORM_DIR/env/ Contents ==="
+if [ -d "$CNB_PLATFORM_DIR/env" ]; then
+    echo "Directory exists: $CNB_PLATFORM_DIR/env"
+    ls -la "$CNB_PLATFORM_DIR/env/"
+
+    echo ""
+    echo "=== Contents of each file in CNB_PLATFORM_DIR/env/ ==="
+    for file in "$CNB_PLATFORM_DIR/env"/*; do
+        if [ -f "$file" ]; then
+            echo "--- File: $(basename "$file") ---"
+            cat "$file"
+            echo ""
+        fi
+    done
+else
+    echo "Directory does not exist: $CNB_PLATFORM_DIR/env"
+fi
+
+echo "=== Inline buildpack execution completed ==="
+"""
